@@ -359,9 +359,9 @@ async function receive(item, key) {
   const plaintext = await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes.slice(0,12)},key,bytes.slice(12));
   const payload = JSON.parse(decode.decode(plaintext));
   if (typeof payload.message !== 'string' || payload.message.length > 160 || !Number.isFinite(payload.time)
-    || Date.now() - payload.time > 600000) return;
+) return;
   const previous = read('maison-last-bell');
-  if (item.id === previous.id || payload.time < (previous.time || 0)) return;
+  if (item.id === previous.id) return;
   const received = {id:item.id,message:payload.message,time:payload.time};
   localStorage.setItem('maison-last-bell',JSON.stringify(received));
   showBell(received);
@@ -377,24 +377,22 @@ async function listen() {
   if (pollingActive) pollingActive.abort();
   const controller = new AbortController();
   pollingActive = controller;
-  let cursor = '10m';
   async function poll() {
     if (controller.signal.aborted) return;
     try {
-      const response = await fetch('https://ntfy.sh/' + topic + '/json?poll=1&since=' + encodeURIComponent(cursor),
+      const response = await fetch('https://ntfy.sh/' + topic + '/json?poll=1&since=latest',
         {signal:AbortSignal.any([controller.signal,AbortSignal.timeout(8000)]), cache:'no-store'});
       if (!response.ok) throw new Error();
       for (const line of (await response.text()).trim().split('\n').filter(Boolean)) {
         const item = JSON.parse(line);
         if (item.event !== 'message' || controller.signal.aborted) continue;
         await receive(item,key).catch(() => {});
-        cursor = item.id;
       }
       if (!controller.signal.aborted) receiverStatus();
     } catch {
       if (!controller.signal.aborted) showBellStatus('Relais inaccessible. Nouvelle tentative dans quelques secondes.');
     }
-    if (!controller.signal.aborted) polling = setTimeout(poll,6000);
+    if (!controller.signal.aborted) polling = setTimeout(poll,8000);
   }
   await poll();
 }
