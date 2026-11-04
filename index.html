@@ -67,7 +67,9 @@ header .tools{position:absolute;right:0;top:0;display:flex;gap:7px}
 .message-item button{font-size:.85rem}
 select{font:inherit;border:1px solid #b79b85;border-radius:8px;background:#fffaf2;color:inherit;padding:7px}
 @media(min-width:600px) and (orientation:landscape){
-  .grid{grid-template-columns:1fr .85fr .85fr 1.2fr}
+  .grid{grid-template-columns:1fr .9fr 1.25fr}
+  .dates-and-messages{max-height:100%;overflow:auto}
+  .dates-and-messages article{max-height:none}
   #messageCard{position:static;width:auto;max-height:100%;overflow:auto}
 }
 
@@ -79,11 +81,12 @@ html[data-theme] .hero{background:var(--accent);color:white}
 html[data-theme] small{color:inherit}
 html[data-theme] .message-item,html[data-theme] .plant-entry{background:var(--base);color:var(--ink)}
 html[data-theme] button,html[data-theme] input,html[data-theme] select{background:var(--card);color:var(--ink)}
+.dates-and-messages{display:grid;gap:10px;min-width:0}
 </style>
 <main><div id="dashboard"><header><div><small>UN PETIT COIN À NOUS</small><h1>Notre maison</h1></div><div class="controls"><div><time id="clock"></time><br><small id="date"></small></div></div><div class="tools"><button id="fullscreen" class="icon" type="button" aria-label="Plein écran" title="Plein écran">⛶</button><button id="openSettings" class="icon" type="button" aria-label="Paramètres" title="Paramètres">⚙</button></div></header>
 <div class="grid">
-<article id="messageCard"><div class="row"><h2>Messages</h2><button id="allMessages" type="button" hidden>Voir tout</button></div><div id="messagePreview" class="message-list" aria-live="polite"></div></article>
-<article class="hero"><div class="row"><h2>On a hâte</h2><button id="datesButton" type="button" aria-label="Régler On a hâte">⚙</button></div><small>Les dates qu’on attend ensemble</small><div id="events" class="items"></div></article>
+
+<div class="dates-and-messages"><article class="hero"><div class="row"><h2>On a hâte</h2><button id="datesButton" type="button" aria-label="Régler On a hâte">⚙</button></div><small>Les dates qu’on attend ensemble</small><div id="events" class="items"></div></article><article id="messageCard"><div class="row"><h2>Messages</h2><button id="allMessages" type="button" hidden>Voir tout</button></div><div id="messagePreview" class="message-list" aria-live="polite"></div></article></div>
 <article class="plant-card"><h2>🪴 Les plantes</h2><small>Prochains arrosages</small><div id="plants" class="items"></div><p id="waterFeedback" role="status"></p></article>
 <article><h2>Météo à Tours</h2><div class="weather-now"><span id="weatherIcon" class="weather-icon" aria-hidden="true"><svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><g id="weatherSymbol"></g></svg></span><p id="weatherTemp" class="weather-temp" hidden></p></div><p id="weatherSummary">Chargement…</p><p id="weatherRange" class="weather-range"></p>
 <figure class="weather-chart" id="weatherChart" hidden><figcaption>Température heure par heure</figcaption><svg viewBox="0 0 320 112" role="img" aria-label="Courbe de température à Tours"><path id="weatherLine" fill="none" stroke="#a64c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g id="weatherLabels"></g></svg></figure>
@@ -113,7 +116,7 @@ html[data-theme] button,html[data-theme] input,html[data-theme] select{backgroun
 <p>Sur la tablette, active la réception puis copie le lien privé pour vos téléphones. Laisse Notre maison ouverte sur la tablette pour entendre le ding.</p>
 <button id="receiveBell" type="button">Activer la réception et tester le son</button>
 <label>Sonnerie<select id="bellTone"><option value="soft">Carillon doux</option><option value="wood">Deux notes boisées</option><option value="clear">Clochette claire</option><option value="warm">Accord chaud</option></select></label>
-<p id="bellSetupStatus" role="status"></p><div id="nativeBellSettings" hidden><button id="enableNative" type="button">Activer les notifications Android</button> <button id="disableNative" type="button">Arrêter la réception Android</button><p>Le son des notifications Android se règle dans le canal « Sonnerie Notre maison » des paramètres système.</p></div>
+<p id="bellSetupStatus" role="status"></p><div id="nativeBellSettings" hidden><button id="enableNative" type="button">Activer les notifications Android</button> <button id="disableNative" type="button">Arrêter la réception Android</button><p>Les notifications Android utilisent le carillon sélectionné ci-dessus. Le volume dépend des réglages de notification de la tablette.</p></div>
 </section></dialog>
 <dialog id="datesDialog" class="settings"><div class="row"><h2>On a hâte</h2><form method="dialog"><button>Fermer</button></form></div><div id="manageDates" class="items"></div><button id="addEvent">+ Ajouter une date</button></dialog><dialog id="messageDialog" class="settings" aria-labelledby="messageDialogTitle"><div class="row"><h2 id="messageDialogTitle"></h2><form method="dialog"><button>Fermer</button></form></div><div id="messageDetails" class="message-list"></div></dialog>
 <dialog id="confirmRemoval" aria-labelledby="removeTitle"><form method="dialog"><h2 id="removeTitle"></h2><button value="cancel" autofocus>Annuler</button> <button value="remove">Supprimer</button></form></dialog>
@@ -433,6 +436,7 @@ const melodies = {soft:[523,659,784],wood:[392,523],clear:[784,1047],warm:[440,5
 tone.value = localStorage.getItem('maison-bell-tone') || 'soft';
 tone.onchange = async () => {
   localStorage.setItem('maison-bell-tone',tone.value);
+  if (document.documentElement.dataset.nativeBell === '1') nativeAction('son',{ton:tone.value});
   await enableAudio();
   chime();
 };
@@ -646,7 +650,7 @@ byId('enableNative').onclick = () => {
     syncSendLink();
     listen().catch(() => {});
   }
-  nativeAction('activer',{code:houseCode});
+  nativeAction('activer',{code:houseCode,ton:tone.value});
 };
 byId('disableNative').onclick = () => nativeAction('arreter');
 window.importNativeBell = serialized => {
