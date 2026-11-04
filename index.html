@@ -20,20 +20,31 @@ header .controls{display:flex;align-items:center;gap:16px;text-align:right}
 .settings section{margin:18px 0;padding-top:14px;border-top:1px solid #e4c9b2}
 .settings .items:empty{display:none}.settings p{margin:.5em 0}
 @media(max-width:480px){header .controls{flex-direction:column;align-items:flex-end;gap:6px}}
+
+[hidden]{display:none!important}
+main{max-width:none;min-height:100dvh;padding:clamp(16px,2.6vw,42px)}
+header{position:relative;padding-right:96px}
+header .tools{position:absolute;right:0;top:0;display:flex;gap:7px}
+.icon{width:40px;height:40px;padding:0;font-size:20px}
+.grid{grid-template-columns:1fr 1.15fr 1fr}
+.weather-temp{font:clamp(30px,5vw,64px) Georgia,serif}
+.weather-range{margin:.3em 0 .5em}
+.message-card{margin:0 0 22px;background:#f0d7bf}
+.message-card p{overflow-wrap:anywhere;white-space:pre-wrap}
+#sender{max-width:560px;margin:0 auto}
+#sender form{display:grid;gap:10px}
+#sender p{margin:.65em 0}
+#appHelp p{margin:.65em 0}
+@media(max-width:680px){.grid{grid-template-columns:1fr}}
 </style>
-<main><header><div><small>UN PETIT COIN À NOUS</small><h1>Notre maison</h1></div><div class="controls"><div><time id="clock"></time><br><small id="date"></small></div><button id="openSettings" type="button">⚙ Paramètres</button></div></header>
+<main><div id="dashboard"><header><div><small>UN PETIT COIN À NOUS</small><h1>Notre maison</h1></div><div class="controls"><div><time id="clock"></time><br><small id="date"></small></div></div><div class="tools"><button id="fullscreen" class="icon" type="button" aria-label="Plein écran" title="Plein écran">⛶</button><button id="openSettings" class="icon" type="button" aria-label="Paramètres" title="Paramètres">⚙</button></div></header>
+<article id="messageCard" class="message-card" hidden><div class="row"><h2>🔔 Un mot pour la maison</h2><button id="dismissMessage" type="button">C’est noté</button></div><p id="lastBell" class="sofa" aria-live="polite"></p></article>
 <div class="grid">
 <article class="hero"><h2>On a hâte</h2><small>Les dates qu’on attend ensemble</small><div id="events" class="items"></div></article>
 <article class="plant-card"><h2>🪴 Les plantes</h2><small>Prochains arrosages</small><div id="plants" class="items"></div></article>
-<article><h2>☀️ Aujourd’hui</h2><div class="items"><a data-package="works.jubilee.timetree" href="https://timetreeapp.com/signin">📅 Ouvrir TimeTree</a><a href="https://meteofrance.com/" target="_blank" rel="noopener">🌤️ Voir la météo</a></div><small>Raccourcis vers vos services</small></article>
+<article><h2>☀️ Météo à Tours</h2><p id="weatherTemp" class="weather-temp" hidden></p><p id="weatherSummary">Chargement…</p><p id="weatherRange" class="weather-range"></p><small>Données <a href="https://open-meteo.com/">Open-Meteo</a></small></article>
 </div>
-<article class="bell"><h2>🔔 Sonner à la maison</h2>
-<p id="lastBell" class="sofa" aria-live="polite">Un petit mot pour la maison</p>
-<form id="bellForm"><input id="bellText" aria-label="Message pour la maison" maxlength="160" placeholder="À table !" required><button>Envoyer</button></form>
-<p><small id="bellStatus" role="status"></small></p>
-<button id="bellSettings" type="button">Voir la configuration</button></article><h2>À portée de main</h2>
-<p id="appStatus" role="status" hidden></p>
-<div class="links">
+<h2>À portée de main</h2><div class="links"><a class="tile" data-package="works.jubilee.timetree" href="https://timetreeapp.com/signin"><strong>📅 Agenda</strong><small>TimeTree</small></a>
 <a class="tile" data-package="com.wizconnected.wiz2" href="#ouvrir-com.wizconnected.wiz2"><strong>💡 Lumières</strong><small>WiZ · accès à l’application</small></a>
 <a class="tile" data-package="myvoltalis.voltalis.com" href="#ouvrir-myvoltalis.voltalis.com"><strong>🌡️ Chauffage</strong><small>MyVoltalis · accès à l’application</small></a>
 <a class="tile" data-package="com.xiaomi.smarthome" href="#ouvrir-com.xiaomi.smarthome"><strong>🤖 Aspirateur</strong><small>Xiaomi Home · accès à l’application</small></a>
@@ -42,12 +53,18 @@ header .controls{display:flex;align-items:center;gap:16px;text-align:right}
 <a class="tile" data-package="deezer.android.app" href="https://www.deezer.com/"><strong>♫ Ambiance</strong><small>Ouvrir Deezer</small></a>
 <a class="tile" href="https://www.google.com/maps"><strong>📍 Localisation</strong><small>Google Maps · partage à configurer</small></a>
 
-</div><footer><small>Les dates et les plantes sont enregistrées dans ce navigateur.</small></footer></main>
+</div><footer><small>Les dates et les plantes sont enregistrées dans ce navigateur.</small></footer></div>
+<article id="sender" hidden><small>NOTRE MAISON</small><h1>Un mot pour la maison</h1>
+<p>Envoie un message à la tablette.</p><form id="bellForm"><input id="bellText" aria-label="Message pour la maison" maxlength="160" placeholder="À table !" required><button>Envoyer</button></form>
+<p id="bellStatus" role="status"></p><button id="senderSettings" type="button">Réglages de l’envoi</button> <a href="./">Retour à l’accueil</a></article>
+</main>
+<dialog id="appHelp" aria-labelledby="appTitle"><h2 id="appTitle">Ouvrir l’application</h2><p>Si l’application ne s’ouvre pas depuis ce navigateur, lance-la depuis l’accueil Android. Tu peux aussi utiliser le bouton <b>Ouvrir</b> de sa fiche Play Store si elle est installée.</p><p><a id="appStore">Fiche Play Store</a> <a id="appWeb" hidden>Version web</a></p><form method="dialog"><button>Fermer</button></form></dialog>
 <dialog id="settings" class="settings" aria-labelledby="settingsTitle">
 <div class="row"><h2 id="settingsTitle">Paramètres</h2><form method="dialog"><button>Fermer</button></form></div>
 <section><h2>🪴 Plantes</h2><div id="managePlants" class="items"></div><button id="addPlant">+ Ajouter une plante</button></section>
 <section><h2>🎄 Dates à venir</h2><div id="manageDates" class="items"></div><button id="addEvent">+ Ajouter une date</button></section>
 <section id="bellSetup"><h2>🔔 Sonnette</h2>
+<p><a id="sendLink" href="?envoyer=1">Ouvrir la page d’envoi</a> · <button id="copyLink" type="button">Copier le lien</button></p><p id="copyStatus" role="status"></p>
 <p>Si le relais n’a pas encore été mis en ligne, tu peux laisser ces champs vides.</p>
 <p><small>L’adresse est celle du service qui envoie les notifications. Le code est le secret choisi lors de son installation. Saisis les mêmes valeurs sur la tablette et les deux téléphones, puis active la réception sur la tablette seulement.</small></p>
 <label>Adresse HTTPS du relais<input id="relay" type="url" placeholder="https://…"></label>
@@ -162,26 +179,73 @@ render();
 setInterval(render, 30000);
 const settings = byId('settings');
 byId('openSettings').onclick = () => settings.showModal();
-byId('bellSettings').onclick = () => {
+const sending = new URLSearchParams(location.search).has('envoyer');
+byId('dashboard').hidden = sending;
+byId('sender').hidden = !sending;
+byId('senderSettings').onclick = () => {
   settings.showModal();
   byId('bellSetup').scrollIntoView({block:'nearest'});
 };
-const appStatus = byId('appStatus');
+const fullscreen = byId('fullscreen');
+fullscreen.hidden = !document.fullscreenEnabled;
+fullscreen.onclick = async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch { fullscreen.hidden = true; }
+};
+byId('copyLink').onclick = async () => {
+  const url = byId('sendLink').href;
+  try {
+    await navigator.clipboard.writeText(url);
+    byId('copyStatus').textContent = 'Lien copié. Ouvre-le sur vos téléphones.';
+  } catch { byId('copyStatus').textContent = url; }
+};
+const appHelp = byId('appHelp');
 const android = /Android/i.test(navigator.userAgent);
 for (const link of document.querySelectorAll('[data-package]')) {
-  const fallback = link.href;
+  const pkg = link.dataset.package;
+  const web = link.getAttribute('href').startsWith('https://') ? link.href : '';
+  const fallback = new URL('./', location.href);
+  fallback.searchParams.set('ouvrir', pkg);
   if (android) {
-    link.href = 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package='
-      + link.dataset.package + ';S.browser_fallback_url=' + encodeURIComponent(fallback) + ';end';
+    const route = pkg === 'deezer.android.app' ? '//www.deezer.com/#Intent;scheme=https;' :
+      '#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;';
+    link.href = 'intent:' + route + 'package=' + pkg + ';S.browser_fallback_url='
+      + encodeURIComponent(fallback.href) + ';end';
+  } else if (!web) link.href = fallback.href;
+  if (new URLSearchParams(location.search).get('ouvrir') === pkg) {
+    byId('appStore').href = 'https://play.google.com/store/apps/details?id=' + pkg;
+    byId('appWeb').hidden = !web;
+    if (web) byId('appWeb').href = web;
+    appHelp.showModal();
+    history.replaceState(null, '', './');
   }
 }
-function showAppHelp() {
-  const app = [...document.querySelectorAll('[data-package]')].find(link => location.hash === '#ouvrir-' + link.dataset.package);
-  appStatus.hidden = !app;
-  if (app) appStatus.textContent = 'Le navigateur n’a pas pu ouvrir cette appli. Lance-la depuis l’écran d’accueil Android.';
+async function weather() {
+  const summary = byId('weatherSummary');
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=47.3941&longitude=0.6848'
+      + '&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FParis&forecast_days=1';
+    const response = await fetch(url, {signal: AbortSignal.timeout(10000)});
+    if (!response.ok) throw new Error('Météo indisponible');
+    const {current,daily} = await response.json();
+    const code = current.weather_code;
+    const temperature = byId('weatherTemp');
+    temperature.textContent = Math.round(current.temperature_2m) + ' °C';
+    temperature.hidden = false;
+    summary.textContent = code === 0 ? 'Ciel dégagé' : code <= 3 ? 'Nuages' : code <= 48 ? 'Brouillard'
+      : code >= 95 ? 'Orages' : [71,73,75,77,85,86].includes(code) ? 'Neige' : 'Pluie ou averses';
+    byId('weatherRange').textContent = 'Min ' + Math.round(daily.temperature_2m_min[0])
+      + '° · Max ' + Math.round(daily.temperature_2m_max[0]) + '°';
+  } catch {
+    summary.textContent = byId('weatherTemp').hidden ? 'Météo momentanément indisponible.' : 'Dernière météo reçue.';
+  }
 }
-window.addEventListener('hashchange', showAppHelp);
-showAppHelp();
+if (!sending) {
+  weather();
+  setInterval(weather, 15 * 60 * 1000);
+}
 const bellStatus = byId('bellStatus');
 function showBellStatus(text) {
   bellStatus.textContent = text;
@@ -241,11 +305,24 @@ byId('receiveBell').onclick = () => bellAction(byId('receiveBell'), async () => 
   await callBell('/subscribe', subscription.toJSON());
   showBellStatus('Cette tablette peut recevoir les messages.');
 });
-function showBell(message) { if (message) byId('lastBell').textContent = message; }
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.addEventListener('message', event => showBell(event.data?.message));
-  const cache = 'maison-bell-v1';
-  if ('caches' in window) caches.match(new URL('./last-bell', location.href), {cacheName:cache})
-    .then(response => response?.json()).then(item => showBell(item?.message)).catch(() => {});
+let currentMessage;
+function showBell(item) {
+  if (!item?.message) return;
+  currentMessage = item.id || item.message;
+  byId('lastBell').textContent = item.message;
+  byId('messageCard').hidden = currentMessage === localStorage.getItem('maison-bell-dismissed');
+}
+byId('dismissMessage').onclick = () => {
+  localStorage.setItem('maison-bell-dismissed', currentMessage);
+  byId('messageCard').hidden = true;
+};
+if (!sending && 'serviceWorker' in navigator) {
+  let receivedLive = false;
+  navigator.serviceWorker.addEventListener('message', event => {
+    receivedLive = true;
+    showBell(event.data);
+  });
+  if ('caches' in window) caches.match(new URL('./last-bell', location.href), {cacheName:'maison-bell-v1'})
+    .then(response => response?.json()).then(item => { if (!receivedLive) showBell(item); }).catch(() => {});
 }
 </script></html>
