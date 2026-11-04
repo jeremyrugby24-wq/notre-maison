@@ -36,24 +36,32 @@ header .tools{position:absolute;right:0;top:0;display:flex;gap:7px}
 #sender p{margin:.65em 0}
 #appHelp p{margin:.65em 0}
 @media(max-width:680px){.grid{grid-template-columns:1fr}}
+.weather-now{display:flex;align-items:center;gap:14px}
+.weather-icon{font-size:clamp(32px,5vw,60px)}
+.weather-chart{margin:10px 0 0}
+.weather-chart svg{display:block;width:100%;height:auto;overflow:visible}
+.weather-chart text{font:11px system-ui;fill:#72584a}
+#waterFeedback{margin-top:.6em;color:#45583e;font-size:.9rem}
 </style>
 <main><div id="dashboard"><header><div><small>UN PETIT COIN À NOUS</small><h1>Notre maison</h1></div><div class="controls"><div><time id="clock"></time><br><small id="date"></small></div></div><div class="tools"><button id="fullscreen" class="icon" type="button" aria-label="Plein écran" title="Plein écran">⛶</button><button id="openSettings" class="icon" type="button" aria-label="Paramètres" title="Paramètres">⚙</button></div></header>
 <article id="messageCard" class="message-card" hidden><div class="row"><h2>🔔 Un mot pour la maison</h2><button id="dismissMessage" type="button">C’est noté</button></div><p id="lastBell" class="sofa" aria-live="polite"></p></article>
 <div class="grid">
 <article class="hero"><h2>On a hâte</h2><small>Les dates qu’on attend ensemble</small><div id="events" class="items"></div></article>
-<article class="plant-card"><h2>🪴 Les plantes</h2><small>Prochains arrosages</small><div id="plants" class="items"></div></article>
-<article><h2>☀️ Météo à Tours</h2><p id="weatherTemp" class="weather-temp" hidden></p><p id="weatherSummary">Chargement…</p><p id="weatherRange" class="weather-range"></p><small>Données <a href="https://open-meteo.com/">Open-Meteo</a></small></article>
+<article class="plant-card"><h2>🪴 Les plantes</h2><small>Prochains arrosages</small><div id="plants" class="items"></div><p id="waterFeedback" role="status"></p></article>
+<article><h2>Météo à Tours</h2><div class="weather-now"><span id="weatherIcon" class="weather-icon" aria-hidden="true"></span><p id="weatherTemp" class="weather-temp" hidden></p></div><p id="weatherSummary">Chargement…</p><p id="weatherRange" class="weather-range"></p>
+<figure class="weather-chart" id="weatherChart" hidden><figcaption>Température heure par heure</figcaption><svg viewBox="0 0 320 112" role="img" aria-label="Courbe de température à Tours"><path id="weatherLine" fill="none" stroke="#a64c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g id="weatherLabels"></g></svg></figure>
+<small><a href="https://open-meteo.com/" aria-label="Source des données météo Open-Meteo">Source météo</a></small></article>
 </div>
 <h2>À portée de main</h2><div class="links"><a class="tile" data-package="works.jubilee.timetree" href="https://timetreeapp.com/signin"><strong>📅 Agenda</strong><small>TimeTree</small></a>
 <a class="tile" data-package="com.wizconnected.wiz2" href="#ouvrir-com.wizconnected.wiz2"><strong>💡 Lumières</strong><small>WiZ · accès à l’application</small></a>
 <a class="tile" data-package="myvoltalis.voltalis.com" href="#ouvrir-myvoltalis.voltalis.com"><strong>🌡️ Chauffage</strong><small>MyVoltalis · accès à l’application</small></a>
 <a class="tile" data-package="com.xiaomi.smarthome" href="#ouvrir-com.xiaomi.smarthome"><strong>🤖 Aspirateur</strong><small>Xiaomi Home · accès à l’application</small></a>
 <a class="tile" href="https://jeremyrugby24-wq.github.io/mes-recettes/"><strong>🍳 Recettes</strong><small>Nos recettes</small></a>
-<a class="tile" href="https://chatgpt.com/?q=Aide-moi%20%C3%A0%20estimer%20les%20calories%20de%20mon%20repas.%20Demande-moi%20les%20ingr%C3%A9dients%20et%20les%20quantit%C3%A9s."><strong>🥗 Estimer un repas</strong><small>Ouvrir ChatGPT</small></a>
+<a class="tile" href="https://chatgpt.com/?q=Aide-moi%20%C3%A0%20estimer%20les%20calories%20et%20les%20prot%C3%A9ines%20de%20mon%20repas.%20Demande-moi%20les%20ingr%C3%A9dients%2C%20les%20portions%20et%20les%20quantit%C3%A9s%20si%20n%C3%A9cessaire.%20Donne-moi%20le%20total%20en%20kcal%20et%20en%20grammes%20de%20prot%C3%A9ines."><strong>🥗 Estimer un repas</strong><small>Ouvrir ChatGPT</small></a>
 <a class="tile" data-package="deezer.android.app" href="https://www.deezer.com/"><strong>♫ Ambiance</strong><small>Ouvrir Deezer</small></a>
 <a class="tile" href="https://www.google.com/maps"><strong>📍 Localisation</strong><small>Google Maps · partage à configurer</small></a>
 
-</div><footer><small>Les dates et les plantes sont enregistrées dans ce navigateur.</small></footer></div>
+</div><footer><small>Les dates et les plantes restent sur cet appareil.</small></footer></div>
 <article id="sender" hidden><small>NOTRE MAISON</small><h1>Un mot pour la maison</h1>
 <p>Envoie un message à la tablette.</p><form id="bellForm"><input id="bellText" aria-label="Message pour la maison" maxlength="160" placeholder="À table !" required><button>Envoyer</button></form>
 <p id="bellStatus" role="status"></p><button id="senderSettings" type="button">Réglages de l’envoi</button> <a href="./">Retour à l’accueil</a></article>
@@ -65,13 +73,11 @@ header .tools{position:absolute;right:0;top:0;display:flex;gap:7px}
 <section><h2>🎄 Dates à venir</h2><div id="manageDates" class="items"></div><button id="addEvent">+ Ajouter une date</button></section>
 <section id="bellSetup"><h2>🔔 Sonnette</h2>
 <p><a id="sendLink" href="?envoyer=1">Ouvrir la page d’envoi</a> · <button id="copyLink" type="button">Copier le lien</button></p><p id="copyStatus" role="status"></p>
-<p>Si le relais n’a pas encore été mis en ligne, tu peux laisser ces champs vides.</p>
-<p><small>L’adresse est celle du service qui envoie les notifications. Le code est le secret choisi lors de son installation. Saisis les mêmes valeurs sur la tablette et les deux téléphones, puis active la réception sur la tablette seulement.</small></p>
-<label>Adresse HTTPS du relais<input id="relay" type="url" placeholder="https://…"></label>
-<label>Code privé partagé<input id="bellKey" type="password" autocomplete="off"></label>
-<button id="saveBell" type="button">Enregistrer</button> <button id="receiveBell" type="button">Activer sur cette tablette</button>
-<p id="bellSetupStatus" role="status"></p><a href="https://github.com/jeremyrugby24-wq/notre-maison/blob/main/sonnette.md">Instructions pour mettre le relais en ligne</a>
+<p>Sur la tablette, active la réception puis copie le lien privé pour vos téléphones. Laisse Notre maison ouverte sur la tablette pour entendre le ding.</p>
+<button id="receiveBell" type="button">Activer la réception et tester le son</button>
+<p id="bellSetupStatus" role="status"></p>
 </section></dialog>
+<dialog id="confirmRemoval" aria-labelledby="removeTitle"><form method="dialog"><h2 id="removeTitle"></h2><button value="cancel" autofocus>Annuler</button> <button value="remove">Supprimer</button></form></dialog>
 <dialog id="editor"><form id="form"><h2 id="formTitle"></h2><label>Nom<input id="entryName" maxlength="65" required></label><label id="extraLabel"><span id="extraText"></span><input id="extra" required></label><button type="submit">Enregistrer</button> <button type="button" id="cancel">Annuler</button></form></dialog>
 <script>
 const byId = id => document.getElementById(id);
@@ -123,24 +129,40 @@ function render() {
   managePlants.replaceChildren();
   events.forEach((event,index) => {
     row(eventList, event.name + ' · ' + message((Date.parse(event.date)-base)/day));
-    row(manageDates, event.name, [['Retirer', () => { events.splice(index,1); save(); }]]);
+    row(manageDates, event.name + ' · ' + event.date.split('-').reverse().join('/'), [
+      ['Modifier', () => open(false,index)],
+      ['Supprimer', () => confirmRemoval(event.name, () => { events.splice(index,1); save(); })]
+    ]);
   });
   if (!plants.length) row(plantList,'Ajoute une plante dans Paramètres.');
   plants.forEach((plant,index) => {
     const days = (plant.next-base)/day;
-    row(plantList, plant.name + ' · ' + (days < 0 ? 'à arroser' : message(days)), [
-      ['Arrosée', () => { plant.next = today() + plant.interval * day; save(); }]
-    ]);
+    const water = () => {
+      plant.next = today() + plant.interval * day;
+      save();
+      byId('waterFeedback').textContent = plant.name + ' arrosée aujourd’hui. Prochain arrosage ' + message(plant.interval) + '.';
+    };
+    const due = days <= 0;
+    row(plantList, plant.name + ' · ' + (due ? 'à arroser' : 'à arroser ' + message(days)),
+      due ? [['J’ai arrosé', water]] : []);
     row(managePlants, plant.name + ' · tous les ' + plant.interval + ' j', [
+      ['J’ai arrosé', water],
       ['Modifier', () => open(true, index)],
-      ['Retirer', () => { plants.splice(index,1); save(); }]
+      ['Supprimer', () => confirmRemoval(plant.name, () => { plants.splice(index,1); save(); })]
     ]);
   });
 }
+const removal = byId('confirmRemoval');
+function confirmRemoval(name, remove) {
+  byId('removeTitle').textContent = 'Supprimer « ' + name + ' » ?';
+  removal.returnValue = 'cancel';
+  removal.onclose = () => { if (removal.returnValue === 'remove') remove(); };
+  removal.showModal();
+}
 const editor = byId('editor'), extra = byId('extra');
-let editingPlant = false, plantIndex = -1;
+let editingPlant = false, entryIndex = -1;
 function open(plant, index = -1) {
-  plantIndex = index;
+  entryIndex = index;
   editingPlant = plant;
   byId('form').reset();
   byId('formTitle').textContent = plant ? 'Ajouter une plante' : 'Ajouter une date';
@@ -149,9 +171,10 @@ function open(plant, index = -1) {
   if (plant) { extra.min = 1; extra.max = 365; }
   else { extra.removeAttribute('min'); extra.removeAttribute('max'); }
   if (index >= 0) {
-    byId('formTitle').textContent = 'Modifier la plante';
-    byId('entryName').value = plants[index].name;
-    extra.value = plants[index].interval;
+    const item = (plant ? plants : events)[index];
+    byId('formTitle').textContent = plant ? 'Modifier la plante' : 'Modifier la date';
+    byId('entryName').value = item.name;
+    extra.value = plant ? item.interval : item.date;
   }
   editor.showModal();
 }
@@ -164,14 +187,15 @@ byId('form').onsubmit = event => {
   if (!name) return;
   if (editingPlant) {
     const interval = Number(extra.value);
-    if (plantIndex < 0) plants.push({name, interval, next: today() + interval * day});
+    if (entryIndex < 0) plants.push({name, interval, next: today() + interval * day});
     else {
-      const plant = plants[plantIndex];
+      const plant = plants[entryIndex];
       plant.next += (interval - plant.interval) * day;
       Object.assign(plant, {name, interval});
     }
   }
-  else events.push({name,date:extra.value});
+  else if (entryIndex < 0) events.push({name,date:extra.value});
+  else Object.assign(events[entryIndex], {name,date:extra.value});
   save();
   editor.close();
 };
@@ -179,6 +203,16 @@ render();
 setInterval(render, 30000);
 const settings = byId('settings');
 byId('openSettings').onclick = () => settings.showModal();
+let pressedBackdrop = false;
+settings.addEventListener('pointerdown', event => {
+  const box = settings.getBoundingClientRect();
+  pressedBackdrop = event.target === settings && (event.clientX < box.left || event.clientX > box.right
+    || event.clientY < box.top || event.clientY > box.bottom);
+});
+settings.addEventListener('click', event => {
+  if (pressedBackdrop && event.target === settings) settings.close();
+  pressedBackdrop = false;
+});
 const sending = new URLSearchParams(location.search).has('envoyer');
 byId('dashboard').hidden = sending;
 byId('sender').hidden = !sending;
@@ -195,6 +229,10 @@ fullscreen.onclick = async () => {
   } catch { fullscreen.hidden = true; }
 };
 byId('copyLink').onclick = async () => {
+  if (!houseCode) {
+    byId('copyStatus').textContent = 'Active d’abord la réception sur la tablette.';
+    return;
+  }
   const url = byId('sendLink').href;
   try {
     await navigator.clipboard.writeText(url);
@@ -222,20 +260,47 @@ for (const link of document.querySelectorAll('[data-package]')) {
     history.replaceState(null, '', './');
   }
 }
+function drawWeather(hourly) {
+  const values = hourly.temperature_2m;
+  const low = Math.min(...values), high = Math.max(...values);
+  const x = index => 15 + 290 * index / (values.length - 1);
+  const y = value => 76 - 48 * (value - low) / Math.max(1, high - low);
+  byId('weatherLine').setAttribute('d', values.map((value,index) =>
+    (index ? 'L' : 'M') + x(index) + ',' + y(value)).join(' '));
+  const labels = byId('weatherLabels');
+  labels.replaceChildren();
+  for (const index of [0,6,12,18,values.length - 1]) {
+    for (const [value, height] of [[Math.round(values[index]) + '°', y(values[index])-9],
+      [hourly.time[index].slice(11,13) + ' h', 103]]) {
+      const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('x', x(index));
+      label.setAttribute('y', height);
+      label.setAttribute('text-anchor','middle');
+      label.textContent = value;
+      labels.append(label);
+    }
+  }
+  byId('weatherChart').hidden = false;
+}
 async function weather() {
   const summary = byId('weatherSummary');
   try {
     const url = 'https://api.open-meteo.com/v1/forecast?latitude=47.3941&longitude=0.6848'
-      + '&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FParis&forecast_days=1';
+      + '&current=temperature_2m,weather_code,is_day,apparent_temperature&hourly=temperature_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FParis&forecast_days=1';
     const response = await fetch(url, {signal: AbortSignal.timeout(10000)});
     if (!response.ok) throw new Error('Météo indisponible');
-    const {current,daily} = await response.json();
+    const {current,daily,hourly} = await response.json();
     const code = current.weather_code;
     const temperature = byId('weatherTemp');
     temperature.textContent = Math.round(current.temperature_2m) + ' °C';
     temperature.hidden = false;
-    summary.textContent = code === 0 ? 'Ciel dégagé' : code <= 3 ? 'Nuages' : code <= 48 ? 'Brouillard'
-      : code >= 95 ? 'Orages' : [71,73,75,77,85,86].includes(code) ? 'Neige' : 'Pluie ou averses';
+    const [icon, conditions] = code === 0 ? [current.is_day ? '☀️' : '🌙','Ciel dégagé']
+      : code === 1 ? ['🌤️','Quelques nuages'] : code === 2 ? ['⛅','Partiellement nuageux']
+      : code === 3 ? ['☁️','Couvert'] : code <= 48 ? ['🌫️','Brouillard']
+      : code >= 95 ? ['⛈️','Orages'] : [71,73,75,77,85,86].includes(code) ? ['🌨️','Neige'] : ['🌧️','Pluie ou averses'];
+    byId('weatherIcon').textContent = icon;
+    summary.textContent = conditions + ' · Ressenti ' + Math.round(current.apparent_temperature) + ' °C';
+    drawWeather(hourly);
     byId('weatherRange').textContent = 'Min ' + Math.round(daily.temperature_2m_min[0])
       + '° · Max ' + Math.round(daily.temperature_2m_max[0]) + '°';
   } catch {
@@ -251,60 +316,115 @@ function showBellStatus(text) {
   bellStatus.textContent = text;
   byId('bellSetupStatus').textContent = text;
 }
-const relayField = byId('relay'), keyField = byId('bellKey');
-let bell = read('maison-bell');
-relayField.value = bell.relay || '';
-keyField.value = bell.key || '';
-showBellStatus(bell.relay ? 'Adresse du relais enregistrée.' : 'Sonnette indisponible tant que le relais n’est pas en ligne.');
-byId('bellForm').querySelector('button').disabled = !bell.relay || !bell.key;
-async function callBell(route, body) {
-  if (!bell.relay || !bell.key) throw new Error('Configure d’abord le relais et le code privé.');
-  const response = await fetch(bell.relay + route, {
-    method: 'POST', headers: {'Content-Type':'application/json', Authorization:'Bearer ' + bell.key},
-    body: JSON.stringify(body)
-  });
-  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Le relais ne répond pas.');
-  return response.json();
+const validCode = code => /^[0-9a-f]{64}$/.test(code || '');
+const incomingCode = new URLSearchParams(location.hash.slice(1)).get('maison');
+let houseCode = localStorage.getItem('maison-room-v1');
+if (sending && validCode(incomingCode)) {
+  houseCode = incomingCode;
+  localStorage.setItem('maison-room-v1', houseCode);
+  history.replaceState(null, '', location.pathname + location.search);
 }
-async function bellAction(button, action) {
-  button.disabled = true;
-  try { await action(); } catch (error) { showBellStatus(error.message); }
-  finally { button.disabled = false; }
+function syncSendLink() {
+  const link = byId('sendLink');
+  link.href = validCode(houseCode) ? '?envoyer=1#maison=' + houseCode : '?envoyer=1';
+  byId('bellForm').querySelector('button').disabled = !validCode(houseCode);
 }
-byId('saveBell').onclick = () => bellAction(byId('saveBell'), async () => {
-  const url = new URL(relayField.value.trim());
-  if (url.protocol !== 'https:' || url.username || url.password) throw new Error('Indique une adresse HTTPS.');
-  const key = keyField.value.trim();
-  if (!key) throw new Error('Indique le code privé.');
-  bell = {relay: url.origin, key};
-  localStorage.setItem('maison-bell', JSON.stringify(bell));
-  byId('bellForm').querySelector('button').disabled = false;
-  showBellStatus('Réglages enregistrés sur cet appareil.');
-});
-byId('bellForm').onsubmit = event => {
-  event.preventDefault();
-  bellAction(event.submitter, async () => {
-    const field = byId('bellText');
-    if (!field.value.trim()) return;
-    await callBell('/ring', {message:field.value.trim()});
-    field.value = '';
-    showBellStatus('Message envoyé au service de notification.');
-  });
+syncSendLink();
+showBellStatus(sending
+  ? (validCode(houseCode) ? 'Téléphone associé.' : 'Ouvre le lien privé créé depuis la tablette.')
+  : (validCode(houseCode) ? 'Lien privé prêt à partager. Active le son après ouverture.' : 'Active la réception sur la tablette.'));
+const hex = data => Array.from(data, byte => byte.toString(16).padStart(2,'0')).join('');
+const encode = new TextEncoder(), decode = new TextDecoder();
+async function room() {
+  const hash = new Uint8Array(await crypto.subtle.digest('SHA-512', encode.encode(houseCode)));
+  const key = await crypto.subtle.importKey('raw', hash.slice(32), 'AES-GCM', false, ['encrypt','decrypt']);
+  return {topic:'notre-maison-' + hex(hash.slice(0,24)),key};
+}
+let audioContext, connection, reconnect;
+function chime() {
+  if (audioContext?.state !== 'running') return;
+  const start = audioContext.currentTime;
+  const volume = audioContext.createGain();
+  volume.gain.setValueAtTime(0.18,start);
+  volume.gain.exponentialRampToValueAtTime(0.001,start + 0.65);
+  const note = audioContext.createOscillator();
+  note.frequency.value = 784;
+  note.connect(volume).connect(audioContext.destination);
+  note.start(start);
+  note.stop(start + 0.65);
+}
+async function listen() {
+  const {topic,key} = await room();
+  clearTimeout(reconnect);
+  if (connection) { connection.onclose = null; connection.close(); }
+  connection = new WebSocket('wss://ntfy.sh/' + topic + '/ws?since=10m');
+  connection.onopen = () => showBellStatus(audioContext?.state === 'running'
+    ? 'Tablette connectée. Laisse Notre maison ouverte.' : 'Tablette connectée. Active le son dans les paramètres.');
+  connection.onclose = () => {
+    showBellStatus('Connexion interrompue. Reconnexion en cours…');
+    reconnect = setTimeout(() => listen().catch(() => {}),15000);
+  };
+  let queue = Promise.resolve();
+  connection.onmessage = event => {
+    queue = queue.then(async () => {
+      const item = JSON.parse(event.data);
+      if (item.event !== 'message' || !item.id || item.message.length > 2048) return;
+      const bytes = Uint8Array.from(atob(item.message), c => c.charCodeAt(0));
+      const plaintext = await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes.slice(0,12)},key,bytes.slice(12));
+      const payload = JSON.parse(decode.decode(plaintext));
+      if (typeof payload.message !== 'string' || payload.message.length > 160 || Date.now() - payload.time > 600000) return;
+      const previous = read('maison-last-bell');
+      if (item.id === previous.id || payload.time <= (previous.time || 0)) return;
+      const received = {id:item.id,message:payload.message,time:payload.time};
+      localStorage.setItem('maison-last-bell',JSON.stringify(received));
+      showBell(received);
+      chime();
+    }).catch(() => {});
+  };
+}
+byId('receiveBell').hidden = sending;
+byId('receiveBell').onclick = async () => {
+  try {
+    const Context = window.AudioContext || window.webkitAudioContext;
+    if (!audioContext) audioContext = new Context();
+    await audioContext.resume();
+    chime();
+    if (!validCode(houseCode)) {
+      houseCode = hex(crypto.getRandomValues(new Uint8Array(32)));
+      localStorage.setItem('maison-room-v1',houseCode);
+    }
+    syncSendLink();
+    await listen();
+    if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
+  } catch {
+    showBellStatus('Impossible d’activer la réception sur cet appareil.');
+  }
 };
-byId('receiveBell').onclick = () => bellAction(byId('receiveBell'), async () => {
-  if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window)) throw new Error('Ouvre le site HTTPS dans Chrome sur la tablette.');
-  if (!bell.relay || !bell.key) throw new Error('Enregistre d’abord les réglages.');
-  if (await Notification.requestPermission() !== 'granted') throw new Error('Autorise les notifications dans Chrome.');
-  const {publicKey} = await callBell('/key', {});
-  await navigator.serviceWorker.register('./sw.js');
-  const registration = await navigator.serviceWorker.ready;
-  const key = Uint8Array.from(atob(publicKey.replace(/-/g,'+').replace(/_/g,'/')), char => char.charCodeAt(0));
-  const current = await registration.pushManager.getSubscription();
-  if (current && String(new Uint8Array(current.options.applicationServerKey)) !== String(key)) await current.unsubscribe();
-  const subscription = await registration.pushManager.getSubscription() || await registration.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:key});
-  await callBell('/subscribe', subscription.toJSON());
-  showBellStatus('Cette tablette peut recevoir les messages.');
-});
+byId('bellForm').onsubmit = async event => {
+  event.preventDefault();
+  const button = event.submitter;
+  const field = byId('bellText'), message = field.value.trim();
+  if (!message || !validCode(houseCode)) return;
+  button.disabled = true;
+  try {
+    const {topic,key} = await room();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const data = encode.encode(JSON.stringify({message,time:Date.now()}));
+    const encrypted = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,data));
+    const response = await fetch('https://ntfy.sh/' + topic, {
+      method:'POST',body:btoa(String.fromCharCode(...iv,...encrypted)),signal:AbortSignal.timeout(12000)
+    });
+    if (!response.ok) throw new Error('Relais indisponible');
+    field.value = '';
+    showBellStatus('Message transmis au relais.');
+  } catch {
+    showBellStatus('Envoi impossible. Réessaie dans un instant.');
+  } finally { button.disabled = false; }
+};
+if (!sending && validCode(houseCode)) {
+  showBell(read('maison-last-bell'));
+  listen().catch(() => showBellStatus('Connexion au relais impossible.'));
+}
 let currentMessage;
 function showBell(item) {
   if (!item?.message) return;
@@ -316,13 +436,4 @@ byId('dismissMessage').onclick = () => {
   localStorage.setItem('maison-bell-dismissed', currentMessage);
   byId('messageCard').hidden = true;
 };
-if (!sending && 'serviceWorker' in navigator) {
-  let receivedLive = false;
-  navigator.serviceWorker.addEventListener('message', event => {
-    receivedLive = true;
-    showBell(event.data);
-  });
-  if ('caches' in window) caches.match(new URL('./last-bell', location.href), {cacheName:'maison-bell-v1'})
-    .then(response => response?.json()).then(item => { if (!receivedLive) showBell(item); }).catch(() => {});
-}
 </script></html>
