@@ -405,8 +405,8 @@ async function receive(item, key) {
   const previous = read('maison-last-bell');
   if (item.id === previous.id) return;
   const received = {id:item.id,message:payload.message,time:payload.time};
-  localStorage.setItem('maison-last-bell',JSON.stringify(received));
   showBell(received);
+  localStorage.setItem('maison-last-bell',JSON.stringify(received));
   chime();
 }
 function receiverStatus() {
@@ -428,7 +428,7 @@ async function listen() {
       for (const line of (await response.text()).trim().split('\n').filter(Boolean).slice(-1)) {
         const item = JSON.parse(line);
         if (item.event !== 'message' || controller.signal.aborted) continue;
-        await receive(item,key).catch(() => {});
+        await receive(item,key);
       }
       if (!controller.signal.aborted) receiverStatus();
     } catch {
@@ -481,10 +481,6 @@ byId('bellForm').onsubmit = async event => {
     showBellStatus('Envoi impossible. Réessaie dans un instant.');
   } finally { button.disabled = false; }
 };
-if (!sending && validCode(houseCode)) {
-  showBell(read('maison-last-bell'));
-  listen().catch(() => showBellStatus('Connexion au relais impossible.'));
-}
 let currentMessage;
 function showBell(item) {
   if (!item?.message) return;
@@ -496,4 +492,8 @@ byId('dismissMessage').onclick = () => {
   localStorage.setItem('maison-bell-dismissed', currentMessage);
   byId('messageCard').hidden = true;
 };
+if (!sending && validCode(houseCode)) {
+  showBell(read('maison-last-bell'));
+  listen().catch(() => showBellStatus('Connexion au relais impossible.'));
+}
 </script></html>
