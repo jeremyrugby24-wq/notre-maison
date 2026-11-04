@@ -70,11 +70,20 @@ select{font:inherit;border:1px solid #b79b85;border-radius:8px;background:#fffaf
   .grid{grid-template-columns:1fr .85fr .85fr 1.2fr}
   #messageCard{position:static;width:auto;max-height:100%;overflow:auto}
 }
+
+fieldset{display:flex;flex-wrap:wrap;gap:8px 14px;border:1px solid #b79b85;border-radius:10px}
+fieldset label{display:flex;align-items:center;gap:4px;margin:4px 0}
+html[data-theme] body{background:radial-gradient(ellipse at 85% 0%,var(--glow),transparent 50%),var(--base);color:var(--ink)}
+html[data-theme] article,html[data-theme] .tile,html[data-theme] dialog{background:var(--card);color:var(--ink);border-color:var(--glow)}
+html[data-theme] .hero{background:var(--accent);color:white}
+html[data-theme] small{color:inherit}
+html[data-theme] .message-item,html[data-theme] .plant-entry{background:var(--base);color:var(--ink)}
+html[data-theme] button,html[data-theme] input,html[data-theme] select{background:var(--card);color:var(--ink)}
 </style>
 <main><div id="dashboard"><header><div><small>UN PETIT COIN À NOUS</small><h1>Notre maison</h1></div><div class="controls"><div><time id="clock"></time><br><small id="date"></small></div></div><div class="tools"><button id="fullscreen" class="icon" type="button" aria-label="Plein écran" title="Plein écran">⛶</button><button id="openSettings" class="icon" type="button" aria-label="Paramètres" title="Paramètres">⚙</button></div></header>
 <div class="grid">
 <article id="messageCard"><div class="row"><h2>Messages</h2><button id="allMessages" type="button" hidden>Voir tout</button></div><div id="messagePreview" class="message-list" aria-live="polite"></div></article>
-<article class="hero"><h2>On a hâte</h2><small>Les dates qu’on attend ensemble</small><div id="events" class="items"></div></article>
+<article class="hero"><div class="row"><h2>On a hâte</h2><button id="datesButton" type="button" aria-label="Régler On a hâte">⚙</button></div><small>Les dates qu’on attend ensemble</small><div id="events" class="items"></div></article>
 <article class="plant-card"><h2>🪴 Les plantes</h2><small>Prochains arrosages</small><div id="plants" class="items"></div><p id="waterFeedback" role="status"></p></article>
 <article><h2>Météo à Tours</h2><div class="weather-now"><span id="weatherIcon" class="weather-icon" aria-hidden="true"><svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><g id="weatherSymbol"></g></svg></span><p id="weatherTemp" class="weather-temp" hidden></p></div><p id="weatherSummary">Chargement…</p><p id="weatherRange" class="weather-range"></p>
 <figure class="weather-chart" id="weatherChart" hidden><figcaption>Température heure par heure</figcaption><svg viewBox="0 0 320 112" role="img" aria-label="Courbe de température à Tours"><path id="weatherLine" fill="none" stroke="#a64c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g id="weatherLabels"></g></svg></figure>
@@ -91,26 +100,52 @@ select{font:inherit;border:1px solid #b79b85;border-radius:8px;background:#fffaf
 
 </div></div>
 <article id="sender" hidden><small>NOTRE MAISON</small><h1>Un mot pour la maison</h1>
-<p>Envoie un message à la tablette.</p><form id="bellForm"><input id="bellText" aria-label="Message pour la maison" maxlength="160" placeholder="À table !" required><label>Priorité<select id="messagePriority"><option value="info">Info · un ding</option><option value="important">Important · toutes les 10 min</option><option value="urgent">Urgent · toutes les 5 s jusqu’à lecture</option></select></label><button>Envoyer</button></form>
+<p>Envoie un message à la tablette.</p><form id="bellForm"><input id="bellText" aria-label="Message pour la maison" maxlength="160" placeholder="À table !" required><fieldset><legend>Sonnerie</legend><label><input type="radio" name="priority" value="info" checked> Une fois</label><label><input type="radio" name="priority" value="important"> Toutes les 10 min</label><label><input type="radio" name="priority" value="urgent"> Jusqu’à lecture</label></fieldset><button>Envoyer</button></form>
 <p id="bellStatus" role="status"></p><h2>Messages envoyés</h2><div id="sentMessages" class="message-list"></div><button id="allSent" type="button" hidden>Voir tout</button></article>
 </main>
 <dialog id="appHelp" aria-labelledby="appTitle"><h2 id="appTitle">Ouvrir l’application</h2><p>Si l’application ne s’ouvre pas depuis ce navigateur, lance-la depuis l’accueil Android. Tu peux aussi utiliser le bouton <b>Ouvrir</b> de sa fiche Play Store si elle est installée.</p><p><a id="appStore">Fiche Play Store</a> <a id="appWeb" hidden>Version web</a></p><form method="dialog"><button>Fermer</button></form></dialog>
 <dialog id="settings" class="settings" aria-labelledby="settingsTitle">
 <div class="row"><h2 id="settingsTitle">Paramètres</h2><form method="dialog"><button>Fermer</button></form></div>
 <section><h2>🪴 Plantes</h2><div id="managePlants" class="items"></div><button id="addPlant">+ Ajouter une plante</button></section>
-<section><h2>🎄 Dates à venir</h2><div id="manageDates" class="items"></div><button id="addEvent">+ Ajouter une date</button></section>
-<section><h2>Localisation</h2><p>Dans Google Maps sur la tablette, connecte le compte qui reçoit le partage. Ouvre ensuite ton profil, puis <strong>Partage de position</strong> et choisis la personne.</p><a href="https://support.google.com/maps/answer/15437054?hl=fr">Aide Google Maps</a></section><section><h2>Messages</h2><button id="historyButton" type="button">Historique des 48 dernières heures</button></section><section id="bellSetup"><h2>🔔 Sonnette</h2>
+<section><h2>Dates à venir</h2><button id="datesSettings" type="button">Régler On a hâte</button></section>
+<section><h2>Thème</h2><label>Ambiance du tableau de bord<select id="theme"></select></label></section><section><h2>Localisation</h2><p>Dans Google Maps sur la tablette, connecte le compte qui reçoit le partage. Ouvre ensuite ton profil, puis <strong>Partage de position</strong> et choisis la personne.</p><a href="https://support.google.com/maps/answer/15437054?hl=fr">Aide Google Maps</a></section><section><h2>Messages</h2><button id="historyButton" type="button">Historique des 48 dernières heures</button></section><section id="bellSetup"><h2>🔔 Sonnette</h2>
 <p><a id="sendLink" href="?envoyer=1">Ouvrir la page d’envoi</a> · <button id="copyLink" type="button">Copier le lien</button></p><p id="copyStatus" role="status"></p>
 <p>Sur la tablette, active la réception puis copie le lien privé pour vos téléphones. Laisse Notre maison ouverte sur la tablette pour entendre le ding.</p>
 <button id="receiveBell" type="button">Activer la réception et tester le son</button>
 <label>Sonnerie<select id="bellTone"><option value="soft">Carillon doux</option><option value="wood">Deux notes boisées</option><option value="clear">Clochette claire</option><option value="warm">Accord chaud</option></select></label>
-<p id="bellSetupStatus" role="status"></p>
+<p id="bellSetupStatus" role="status"></p><div id="nativeBellSettings" hidden><button id="enableNative" type="button">Activer les notifications Android</button> <button id="disableNative" type="button">Arrêter la réception Android</button><p>Le son des notifications Android se règle dans le canal « Sonnerie Notre maison » des paramètres système.</p></div>
 </section></dialog>
-<dialog id="messageDialog" class="settings" aria-labelledby="messageDialogTitle"><div class="row"><h2 id="messageDialogTitle"></h2><form method="dialog"><button>Fermer</button></form></div><div id="messageDetails" class="message-list"></div></dialog>
+<dialog id="datesDialog" class="settings"><div class="row"><h2>On a hâte</h2><form method="dialog"><button>Fermer</button></form></div><div id="manageDates" class="items"></div><button id="addEvent">+ Ajouter une date</button></dialog><dialog id="messageDialog" class="settings" aria-labelledby="messageDialogTitle"><div class="row"><h2 id="messageDialogTitle"></h2><form method="dialog"><button>Fermer</button></form></div><div id="messageDetails" class="message-list"></div></dialog>
 <dialog id="confirmRemoval" aria-labelledby="removeTitle"><form method="dialog"><h2 id="removeTitle"></h2><button value="cancel" autofocus>Annuler</button> <button value="remove">Supprimer</button></form></dialog>
 <dialog id="editor"><form id="form"><h2 id="formTitle"></h2><label>Nom<input id="entryName" maxlength="65" required></label><label id="extraLabel"><span id="extraText"></span><input id="extra" required></label><button type="submit">Enregistrer</button> <button type="button" id="waterFromPlant" hidden>J’ai arrosé</button> <button type="button" id="cancel">Annuler</button></form></dialog>
 <script>
 const byId = id => document.getElementById(id);
+const themes = {
+  Terracotta:['#f5e6d6','#efc6a1','#fff7ec','#402d25','#a64c34'],
+  Sauge:['#e6ebdf','#c6d6b4','#f7f9f1','#2e3b28','#49663d'],
+  Océan:['#e1eff2','#acd5e1','#f2fafb','#233b47','#316c80'],
+  Lavande:['#eee7f6','#d7c3eb','#fbf6ff','#3d2e51','#74529a'],
+  Sable:['#eee7d3','#e0c793','#fffaf0','#493a24','#80602d'],
+  Rose:['#f8e6ec','#ecc1d0','#fff5f8','#51313e','#9b4a66'],
+  Citron:['#f4efd0','#ead77f','#fffce9','#4a431c','#73621e'],
+  Ardoise:['#e5e8ef','#bdc8d9','#f5f7fb','#293548','#4a607c'],
+  Forêt:['#dce9e4','#9cc7b3','#f1f8f3','#1f4034','#2a6653'],
+  Nuit:['#161e2c','#343d58','#232e42','#e9edf7','#51618c']
+};
+const themeSelect = byId('theme');
+for (const name of Object.keys(themes)) themeSelect.add(new Option(name,name));
+function applyTheme(name) {
+  const root = document.documentElement;
+  root.dataset.theme = name;
+  ['base','glow','card','ink','accent'].forEach((key,index) => root.style.setProperty('--'+key,themes[name][index]));
+  themeSelect.value = name;
+}
+const savedTheme = localStorage.getItem('maison-theme');
+applyTheme(Object.hasOwn(themes,savedTheme) ? savedTheme : 'Terracotta');
+themeSelect.onchange = () => {
+  applyTheme(themeSelect.value);
+  localStorage.setItem('maison-theme',themeSelect.value);
+};
 function read(key) {
   try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
 }
@@ -221,6 +256,8 @@ function open(plant, index = -1) {
   };
   editor.showModal();
 }
+for (const id of ['datesButton','datesSettings']) byId(id).onclick = () => byId('datesDialog').showModal();
+byId('events').onclick = () => byId('datesDialog').showModal();
 byId('addEvent').onclick = () => open(false);
 byId('addPlant').onclick = () => open(true);
 byId('cancel').onclick = () => editor.close();
@@ -440,12 +477,29 @@ function drawMessages(target, items, toggle) {
     const text = document.createElement('p');
     text.textContent = item.message;
     entry.append(details,text);
-    if (toggle) {
+    if (!toggle && item.uid && !item.cancelled) {
+      const cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.textContent = 'Annuler';
+      cancel.onclick = async () => {
+        cancel.disabled = true;
+        try {
+          await publishBell({cancel:item.uid,time:Date.now()});
+          item.cancelled = true;
+          saveMessages();
+          showBellStatus('Annulation envoyée à la tablette.');
+        } catch { cancel.disabled = false; showBellStatus('Annulation impossible. Réessaie.'); }
+      };
+      entry.append(cancel);
+    }
+    if (item.cancelled) details.textContent += ' · Annulé';
+    if (toggle && !item.cancelled) {
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = item.read ? 'Marquer non lu' : 'C’est noté';
       button.onclick = () => {
         item.read = !item.read;
+        if (document.documentElement.dataset.nativeActive === '1') nativeAction('etat',{id:item.id,lu:item.read ? '1' : '0'});
         item.lastRing = Date.now();
         saveMessages();
       };
@@ -459,7 +513,7 @@ function saveMessages() {
   inbox = inbox.filter(item => (item.receivedAt || item.time) > cutoff);
   sent = sent.filter(item => item.time > cutoff);
   localStorage.setItem(sending ? sentKey : inboxKey,JSON.stringify(sending ? sent : inbox));
-  const unread = inbox.filter(item => !item.read);
+  const unread = inbox.filter(item => !item.read && !item.cancelled);
   drawMessages(byId('messagePreview'),unread.slice(0,previewLimit),true);
   byId('allMessages').hidden = unread.length <= previewLimit;
   drawMessages(byId('sentMessages'),sent.slice(0,previewLimit),false);
@@ -480,10 +534,10 @@ byId('allSent').onclick = () => openMessages('sent','Messages envoyés · 48 h')
 saveMessages();
 if (!sending) setInterval(() => {
   const now = Date.now();
-  const due = inbox.filter(item => !item.read && (item.priority === 'urgent' || item.priority === 'important')
+  const due = inbox.filter(item => !item.read && !item.cancelled && (item.priority === 'urgent' || item.priority === 'important')
     && now - (item.lastRing || item.time) >= (item.priority === 'urgent' ? 5000 : 600000)
     && now - (item.receivedAt || item.time) < retention);
-  if (due.length && audioContext?.state === 'running') {
+  if (document.documentElement.dataset.nativeActive !== '1' && due.length && audioContext?.state === 'running') {
     chime();
     due.forEach(item => { item.lastRing = now; });
     localStorage.setItem(inboxKey,JSON.stringify(inbox));
@@ -495,14 +549,19 @@ async function receive(item, key) {
   const bytes = Uint8Array.from(atob(item.message.trim().replace(/^maison1:/,'')), c => c.charCodeAt(0));
   const plaintext = await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes.slice(0,12)},key,bytes.slice(12));
   const payload = JSON.parse(decode.decode(plaintext));
+  if (typeof payload.cancel === 'string') {
+    const original = inbox.find(message => message.uid === payload.cancel);
+    if (original && !original.cancelled) { original.cancelled = true; saveMessages(); }
+    return;
+  }
   if (typeof payload.message !== 'string' || payload.message.length > 160 || !Number.isFinite(payload.time)
 ) return;
   if (inbox.some(message => message.id === item.id) || payload.time < Date.now() - retention) return;
   const now = Date.now();
   const priority = Object.hasOwn(labels,payload.priority) ? payload.priority : 'info';
-  inbox.unshift({id:item.id,message:payload.message,time:payload.time,receivedAt:now,priority,read:false,lastRing:now});
+  inbox.unshift({id:item.id,uid:payload.uid,message:payload.message,time:payload.time,receivedAt:now,priority,read:false,lastRing:now});
   saveMessages();
-  chime();
+  if (document.documentElement.dataset.nativeActive !== '1') chime();
 }
 function receiverStatus() {
   showBellStatus(audioContext?.state === 'running' ? 'Tablette connectée. Laisse Notre maison ouverte.'
@@ -548,6 +607,15 @@ byId('receiveBell').onclick = async () => {
     showBellStatus('Impossible d’activer la réception sur cet appareil.');
   }
 };
+async function publishBell(payload) {
+  const {topic,key} = await room();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,encode.encode(JSON.stringify(payload))));
+  const response = await fetch('https://ntfy.sh/' + topic, {
+    method:'POST',body:'maison1:' + btoa(String.fromCharCode(...iv,...encrypted)),signal:AbortSignal.timeout(12000)
+  });
+  if (!response.ok) throw new Error('Relais indisponible');
+}
 byId('bellForm').onsubmit = async event => {
   event.preventDefault();
   const button = event.submitter;
@@ -555,23 +623,43 @@ byId('bellForm').onsubmit = async event => {
   if (!message || !validCode(houseCode)) return;
   button.disabled = true;
   try {
-    const {topic,key} = await room();
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const priority = byId('messagePriority').value;
-    const time = Date.now();
-    const data = encode.encode(JSON.stringify({message,time,priority}));
-    const encrypted = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,data));
-    const response = await fetch('https://ntfy.sh/' + topic, {
-      method:'POST',body:'maison1:' + btoa(String.fromCharCode(...iv,...encrypted)),signal:AbortSignal.timeout(12000)
-    });
-    if (!response.ok) throw new Error('Relais indisponible');
-    sent.unshift({message,priority,time});
+    const priority = new FormData(byId('bellForm')).get('priority');
+    const time = Date.now(), uid = crypto.randomUUID();
+    await publishBell({message,time,priority,uid});
+    sent.unshift({message,priority,time,uid});
     saveMessages();
-    field.value = '';
+    byId('bellForm').reset();
     showBellStatus('Message envoyé. Il doit apparaître sur le tableau de bord qui a créé ce lien.');
   } catch {
     showBellStatus('Envoi impossible. Réessaie dans un instant.');
   } finally { button.disabled = false; }
+};
+function nativeAction(action,params={}) {
+  const url = new URL('./__sonnette',location.href);
+  url.search = new URLSearchParams({action,...params});
+  location.assign(url);
+}
+byId('enableNative').onclick = () => {
+  if (!validCode(houseCode)) {
+    houseCode = hex(crypto.getRandomValues(new Uint8Array(32)));
+    localStorage.setItem('maison-room-v1',houseCode);
+    syncSendLink();
+    listen().catch(() => {});
+  }
+  nativeAction('activer',{code:houseCode});
+};
+byId('disableNative').onclick = () => nativeAction('arreter');
+window.importNativeBell = serialized => {
+  if (sending) return;
+  byId('nativeBellSettings').hidden = false;
+  for (const item of JSON.parse(serialized)) {
+    if (!item.id || !item.message || item.time < Date.now()-retention) continue;
+    const old = inbox.find(message => message.id === item.id);
+    if (old) { if (item.cancelled) old.cancelled = true; continue; }
+    inbox.push({...item,priority:Object.hasOwn(labels,item.priority) ? item.priority : 'info'});
+  }
+  inbox.sort((a,b) => b.time-a.time);
+  saveMessages();
 };
 if (!sending && validCode(houseCode)) listen().catch(() => showBellStatus('Connexion au relais impossible.'));
 </script></html>
