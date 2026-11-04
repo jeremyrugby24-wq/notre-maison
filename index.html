@@ -340,7 +340,7 @@ async function room() {
   const key = await crypto.subtle.importKey('raw', hash.slice(32), 'AES-GCM', false, ['encrypt','decrypt']);
   return {topic:'notre-maison-' + hex(hash.slice(0,24)),key};
 }
-let audioContext, connection, reconnect;
+let audioContext, connection, reconnect, polling, pollingActive;
 function chime() {
   if (audioContext?.state !== 'running') return;
   const start = audioContext.currentTime;
@@ -353,42 +353,86 @@ function chime() {
   note.start(start);
   note.stop(start + 0.65);
 }
+async function receive(item, key) {
+  if (item.event !== 'message' || !item.id || typeof item.message !== 'string' || item.message.length > 2048) return;
+  const bytes = Uint8Array.from(atob(item.message), c => c.charCodeAt(0));
+  const plaintext = await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes.slice(0,12)},key,bytes.slice(12));
+  const payload = JSON.parse(decode.decode(plaintext));
+  if (typeof payload.message !== 'string' || payload.message.length > 160 || !Number.isFinite(payload.time)
+    || Date.now() - payload.time > 600000) return;
+  const previous = read('maison-last-bell');
+  if (item.id === previous.id || payload.time < (previous.time || 0)) return;
+  const received = {id:item.id,message:payload.message,time:payload.time};
+  localStorage.setItem('maison-last-bell',JSON.stringify(received));
+  showBell(received);
+  chime();
+}
+function receiverStatus() {
+  showBellStatus(audioContext?.state === 'running' ? 'Tablette connectée. Laisse Notre maison ouverte.'
+    : 'Réception active. Appuie sur le bouton de test pour activer le son sur cet appareil.');
+}
 async function listen() {
   const {topic,key} = await room();
   clearTimeout(reconnect);
+  clearTimeout(polling);
+  if (pollingActive) pollingActive.abort();
+  const controller = new AbortController();
+  pollingActive = controller;
   if (connection) { connection.onclose = null; connection.close(); }
-  connection = new WebSocket('wss://ntfy.sh/' + topic + '/ws?since=10m');
-  connection.onopen = () => showBellStatus(audioContext?.state === 'running'
-    ? 'Tablette connectée. Laisse Notre maison ouverte.' : 'Tablette connectée. Active le son dans les paramètres.');
-  connection.onclose = () => {
-    showBellStatus('Connexion interrompue. Reconnexion en cours…');
-    reconnect = setTimeout(() => listen().catch(() => {}),15000);
-  };
+  let cursor = '10m';
   let queue = Promise.resolve();
-  connection.onmessage = event => {
-    queue = queue.then(async () => {
-      const item = JSON.parse(event.data);
-      if (item.event !== 'message' || !item.id || item.message.length > 2048) return;
-      const bytes = Uint8Array.from(atob(item.message), c => c.charCodeAt(0));
-      const plaintext = await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes.slice(0,12)},key,bytes.slice(12));
-      const payload = JSON.parse(decode.decode(plaintext));
-      if (typeof payload.message !== 'string' || payload.message.length > 160 || Date.now() - payload.time > 600000) return;
-      const previous = read('maison-last-bell');
-      if (item.id === previous.id || payload.time <= (previous.time || 0)) return;
-      const received = {id:item.id,message:payload.message,time:payload.time};
-      localStorage.setItem('maison-last-bell',JSON.stringify(received));
-      showBell(received);
-      chime();
-    }).catch(() => {});
+  const accept = item => {
+    queue = queue.then(() => receive(item,key)).catch(() => {});
+    return queue;
   };
+  async function poll() {
+    if (controller.signal.aborted) return;
+    try {
+      const response = await fetch('https://ntfy.sh/' + topic + '/json?poll=1&since=' + encodeURIComponent(cursor),
+        {signal:controller.signal, cache:'no-store'});
+      if (!response.ok) throw new Error();
+      for (const line of (await response.text()).trim().split('\n').filter(Boolean)) {
+        const item = JSON.parse(line);
+        if (item.event !== 'message' || controller.signal.aborted) continue;
+        await accept(item);
+        cursor = item.id;
+      }
+      if (!controller.signal.aborted) receiverStatus();
+    } catch {
+      if (!controller.signal.aborted) showBellStatus('Relais inaccessible. Nouvelle tentative dans quelques secondes.');
+    }
+    if (!controller.signal.aborted) polling = setTimeout(poll,12000);
+  }
+  try {
+    connection = new WebSocket('wss://ntfy.sh/' + topic + '/ws?since=10m');
+    reconnect = setTimeout(() => {
+      connection.onclose = null;
+      connection.close();
+      poll();
+    },8000);
+    connection.onopen = () => { clearTimeout(reconnect); receiverStatus(); };
+    connection.onclose = () => { clearTimeout(reconnect); poll(); };
+    connection.onmessage = event => {
+      try {
+        const item = JSON.parse(event.data);
+        if (item.event !== 'message') return;
+        cursor = item.id;
+        accept(item);
+      } catch {}
+    };
+  } catch { poll(); }
 }
 byId('receiveBell').hidden = sending;
 byId('receiveBell').onclick = async () => {
   try {
-    const Context = window.AudioContext || window.webkitAudioContext;
-    if (!audioContext) audioContext = new Context();
-    await audioContext.resume();
-    chime();
+    try {
+      const Context = window.AudioContext || window.webkitAudioContext;
+      if (!audioContext && Context) audioContext = new Context();
+      if (audioContext) {
+        await audioContext.resume();
+        chime();
+      }
+    } catch {}
     if (!validCode(houseCode)) {
       houseCode = hex(crypto.getRandomValues(new Uint8Array(32)));
       localStorage.setItem('maison-room-v1',houseCode);
@@ -416,7 +460,7 @@ byId('bellForm').onsubmit = async event => {
     });
     if (!response.ok) throw new Error('Relais indisponible');
     field.value = '';
-    showBellStatus('Message transmis au relais.');
+    showBellStatus('Message envoyé. Il doit apparaître sur le tableau de bord qui a créé ce lien.');
   } catch {
     showBellStatus('Envoi impossible. Réessaie dans un instant.');
   } finally { button.disabled = false; }
