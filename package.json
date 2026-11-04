@@ -1,0 +1,1 @@
+{"name":"notre-maison-relay","private":true,"scripts":{"start":"node relay.cjs"},"dependencies":{"web-push":"3.6.7"}}
