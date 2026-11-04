@@ -15,31 +15,46 @@ button,input{border-color:#b79b85;background:#fffaf2}
 .sofa{font-family:Georgia,serif;font-size:1.3rem}.bell{margin:0 0 22px;background:#f0d7bf}
 .bell p{margin:.5rem 0}.bell form{display:flex;gap:.5rem}.bell input{flex:1;min-width:0}.bell details{margin-top:.8rem}.bell label{max-width:480px}
 @media(max-width:680px){.grid{grid-template-columns:1fr}.hero{grid-column:auto}}
+header .controls{display:flex;align-items:center;gap:16px;text-align:right}
+.settings{width:min(560px,94vw);max-height:85vh;overflow:auto}
+.settings section{margin:18px 0;padding-top:14px;border-top:1px solid #e4c9b2}
+.settings .items:empty{display:none}.settings p{margin:.5em 0}
+@media(max-width:480px){header .controls{flex-direction:column;align-items:flex-end;gap:6px}}
 </style>
-<main><header><div><small>UN PETIT COIN À NOUS</small><h1>Notre maison</h1></div><div style="text-align:right"><time id="clock"></time><br><small id="date"></small></div></header>
+<main><header><div><small>UN PETIT COIN À NOUS</small><h1>Notre maison</h1></div><div class="controls"><div><time id="clock"></time><br><small id="date"></small></div><button id="openSettings" type="button">⚙ Paramètres</button></div></header>
 <div class="grid">
-<article class="hero"><h2>On a hâte</h2><small>Les dates qu’on attend ensemble</small><div id="events" class="items"></div><button id="addEvent">+ Une date</button></article>
-<article class="plant-card"><h2>🪴 Les plantes</h2><small>Prochains arrosages</small><div id="plants" class="items"></div><button id="addPlant">+ Une plante</button></article>
-<article><h2>☀️ Aujourd’hui</h2><div class="items"><a href="https://timetreeapp.com/" target="_blank" rel="noopener">📅 Ouvrir TimeTree</a><a href="https://meteofrance.com/" target="_blank" rel="noopener">🌤️ Voir la météo</a></div><small>Raccourcis vers vos services</small></article>
+<article class="hero"><h2>On a hâte</h2><small>Les dates qu’on attend ensemble</small><div id="events" class="items"></div></article>
+<article class="plant-card"><h2>🪴 Les plantes</h2><small>Prochains arrosages</small><div id="plants" class="items"></div></article>
+<article><h2>☀️ Aujourd’hui</h2><div class="items"><a data-package="works.jubilee.timetree" href="https://timetreeapp.com/signin">📅 Ouvrir TimeTree</a><a href="https://meteofrance.com/" target="_blank" rel="noopener">🌤️ Voir la météo</a></div><small>Raccourcis vers vos services</small></article>
 </div>
 <article class="bell"><h2>🔔 Sonner à la maison</h2>
 <p id="lastBell" class="sofa" aria-live="polite">Un petit mot pour la maison</p>
 <form id="bellForm"><input id="bellText" aria-label="Message pour la maison" maxlength="160" placeholder="À table !" required><button>Envoyer</button></form>
 <p><small id="bellStatus" role="status"></small></p>
-<details><summary>Configurer la sonnette</summary>
-<label>Adresse HTTPS du relais<input id="relay" type="url" placeholder="https://…"></label>
-<label>Code privé partagé<input id="bellKey" type="password" autocomplete="off"></label>
-<button id="saveBell" type="button">Enregistrer</button> <button id="receiveBell" type="button">Activer sur cette tablette</button>
-</details></article><h2>À portée de main</h2><div class="links">
-<a class="tile" href="https://play.google.com/store/search?q=WiZ%20Connected&c=apps"><strong>💡 Lumières</strong><small>WiZ · accès à l’application</small></a>
-<a class="tile" href="https://play.google.com/store/search?q=MyVoltalis&c=apps"><strong>🌡️ Chauffage</strong><small>MyVoltalis · accès à l’application</small></a>
-<a class="tile" href="https://play.google.com/store/apps/details?id=com.xiaomi.smarthome"><strong>🤖 Aspirateur</strong><small>Xiaomi Home · accès à l’application</small></a>
+<button id="bellSettings" type="button">Voir la configuration</button></article><h2>À portée de main</h2>
+<p id="appStatus" role="status" hidden></p>
+<div class="links">
+<a class="tile" data-package="com.wizconnected.wiz2" href="#ouvrir-com.wizconnected.wiz2"><strong>💡 Lumières</strong><small>WiZ · accès à l’application</small></a>
+<a class="tile" data-package="myvoltalis.voltalis.com" href="#ouvrir-myvoltalis.voltalis.com"><strong>🌡️ Chauffage</strong><small>MyVoltalis · accès à l’application</small></a>
+<a class="tile" data-package="com.xiaomi.smarthome" href="#ouvrir-com.xiaomi.smarthome"><strong>🤖 Aspirateur</strong><small>Xiaomi Home · accès à l’application</small></a>
 <a class="tile" href="https://jeremyrugby24-wq.github.io/mes-recettes/"><strong>🍳 Recettes</strong><small>Nos recettes</small></a>
 <a class="tile" href="https://chatgpt.com/?q=Aide-moi%20%C3%A0%20estimer%20les%20calories%20de%20mon%20repas.%20Demande-moi%20les%20ingr%C3%A9dients%20et%20les%20quantit%C3%A9s."><strong>🥗 Estimer un repas</strong><small>Ouvrir ChatGPT</small></a>
-<a class="tile" href="https://www.deezer.com/"><strong>♫ Ambiance</strong><small>Ouvrir Deezer</small></a>
+<a class="tile" data-package="deezer.android.app" href="https://www.deezer.com/"><strong>♫ Ambiance</strong><small>Ouvrir Deezer</small></a>
 <a class="tile" href="https://www.google.com/maps"><strong>📍 Localisation</strong><small>Google Maps · partage à configurer</small></a>
 
 </div><footer><small>Les dates et les plantes sont enregistrées dans ce navigateur.</small></footer></main>
+<dialog id="settings" class="settings" aria-labelledby="settingsTitle">
+<div class="row"><h2 id="settingsTitle">Paramètres</h2><form method="dialog"><button>Fermer</button></form></div>
+<section><h2>🪴 Plantes</h2><div id="managePlants" class="items"></div><button id="addPlant">+ Ajouter une plante</button></section>
+<section><h2>🎄 Dates à venir</h2><div id="manageDates" class="items"></div><button id="addEvent">+ Ajouter une date</button></section>
+<section id="bellSetup"><h2>🔔 Sonnette</h2>
+<p>Si le relais n’a pas encore été mis en ligne, tu peux laisser ces champs vides.</p>
+<p><small>L’adresse est celle du service qui envoie les notifications. Le code est le secret choisi lors de son installation. Saisis les mêmes valeurs sur la tablette et les deux téléphones, puis active la réception sur la tablette seulement.</small></p>
+<label>Adresse HTTPS du relais<input id="relay" type="url" placeholder="https://…"></label>
+<label>Code privé partagé<input id="bellKey" type="password" autocomplete="off"></label>
+<button id="saveBell" type="button">Enregistrer</button> <button id="receiveBell" type="button">Activer sur cette tablette</button>
+<p id="bellSetupStatus" role="status"></p><a href="https://github.com/jeremyrugby24-wq/notre-maison/blob/main/sonnette.md">Instructions pour mettre le relais en ligne</a>
+</section></dialog>
 <dialog id="editor"><form id="form"><h2 id="formTitle"></h2><label>Nom<input id="entryName" maxlength="65" required></label><label id="extraLabel"><span id="extraText"></span><input id="extra" required></label><button type="submit">Enregistrer</button> <button type="button" id="cancel">Annuler</button></form></dialog>
 <script>
 const byId = id => document.getElementById(id);
@@ -86,13 +101,21 @@ function render() {
   let christmas = Date.UTC(now.getFullYear(),11,25);
   if (christmas < base) christmas = Date.UTC(now.getFullYear()+1,11,25);
   row(eventList, '🎄 Noël · ' + message((christmas-base)/day));
-  events.forEach((event,index) => row(eventList, event.name + ' · ' + message((Date.parse(event.date)-base)/day), [['Retirer', () => { events.splice(index,1); save(); }]]));
-  if (!plants.length) row(plantList,'Ajoute ta première plante.');
+  const manageDates = byId('manageDates'), managePlants = byId('managePlants');
+  manageDates.replaceChildren();
+  managePlants.replaceChildren();
+  events.forEach((event,index) => {
+    row(eventList, event.name + ' · ' + message((Date.parse(event.date)-base)/day));
+    row(manageDates, event.name, [['Retirer', () => { events.splice(index,1); save(); }]]);
+  });
+  if (!plants.length) row(plantList,'Ajoute une plante dans Paramètres.');
   plants.forEach((plant,index) => {
     const days = (plant.next-base)/day;
     row(plantList, plant.name + ' · ' + (days < 0 ? 'à arroser' : message(days)), [
+      ['Arrosée', () => { plant.next = today() + plant.interval * day; save(); }]
+    ]);
+    row(managePlants, plant.name + ' · tous les ' + plant.interval + ' j', [
       ['Modifier', () => open(true, index)],
-      ['Arrosée', () => { plant.next = today() + plant.interval * day; save(); }],
       ['Retirer', () => { plants.splice(index,1); save(); }]
     ]);
   });
@@ -137,12 +160,39 @@ byId('form').onsubmit = event => {
 };
 render();
 setInterval(render, 30000);
+const settings = byId('settings');
+byId('openSettings').onclick = () => settings.showModal();
+byId('bellSettings').onclick = () => {
+  settings.showModal();
+  byId('bellSetup').scrollIntoView({block:'nearest'});
+};
+const appStatus = byId('appStatus');
+const android = /Android/i.test(navigator.userAgent);
+for (const link of document.querySelectorAll('[data-package]')) {
+  const fallback = link.href;
+  if (android) {
+    link.href = 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package='
+      + link.dataset.package + ';S.browser_fallback_url=' + encodeURIComponent(fallback) + ';end';
+  }
+}
+function showAppHelp() {
+  const app = [...document.querySelectorAll('[data-package]')].find(link => location.hash === '#ouvrir-' + link.dataset.package);
+  appStatus.hidden = !app;
+  if (app) appStatus.textContent = 'Le navigateur n’a pas pu ouvrir cette appli. Lance-la depuis l’écran d’accueil Android.';
+}
+window.addEventListener('hashchange', showAppHelp);
+showAppHelp();
 const bellStatus = byId('bellStatus');
+function showBellStatus(text) {
+  bellStatus.textContent = text;
+  byId('bellSetupStatus').textContent = text;
+}
 const relayField = byId('relay'), keyField = byId('bellKey');
 let bell = read('maison-bell');
 relayField.value = bell.relay || '';
 keyField.value = bell.key || '';
-bellStatus.textContent = bell.relay ? 'Relais configuré.' : 'Sonnette à connecter au relais.';
+showBellStatus(bell.relay ? 'Adresse du relais enregistrée.' : 'Sonnette indisponible tant que le relais n’est pas en ligne.');
+byId('bellForm').querySelector('button').disabled = !bell.relay || !bell.key;
 async function callBell(route, body) {
   if (!bell.relay || !bell.key) throw new Error('Configure d’abord le relais et le code privé.');
   const response = await fetch(bell.relay + route, {
@@ -154,7 +204,7 @@ async function callBell(route, body) {
 }
 async function bellAction(button, action) {
   button.disabled = true;
-  try { await action(); } catch (error) { bellStatus.textContent = error.message; }
+  try { await action(); } catch (error) { showBellStatus(error.message); }
   finally { button.disabled = false; }
 }
 byId('saveBell').onclick = () => bellAction(byId('saveBell'), async () => {
@@ -164,7 +214,8 @@ byId('saveBell').onclick = () => bellAction(byId('saveBell'), async () => {
   if (!key) throw new Error('Indique le code privé.');
   bell = {relay: url.origin, key};
   localStorage.setItem('maison-bell', JSON.stringify(bell));
-  bellStatus.textContent = 'Réglages enregistrés.';
+  byId('bellForm').querySelector('button').disabled = false;
+  showBellStatus('Réglages enregistrés sur cet appareil.');
 });
 byId('bellForm').onsubmit = event => {
   event.preventDefault();
@@ -173,7 +224,7 @@ byId('bellForm').onsubmit = event => {
     if (!field.value.trim()) return;
     await callBell('/ring', {message:field.value.trim()});
     field.value = '';
-    bellStatus.textContent = 'Message envoyé au service de notification.';
+    showBellStatus('Message envoyé au service de notification.');
   });
 };
 byId('receiveBell').onclick = () => bellAction(byId('receiveBell'), async () => {
@@ -188,7 +239,7 @@ byId('receiveBell').onclick = () => bellAction(byId('receiveBell'), async () => 
   if (current && String(new Uint8Array(current.options.applicationServerKey)) !== String(key)) await current.unsubscribe();
   const subscription = await registration.pushManager.getSubscription() || await registration.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:key});
   await callBell('/subscribe', subscription.toJSON());
-  bellStatus.textContent = 'Cette tablette peut recevoir les messages.';
+  showBellStatus('Cette tablette peut recevoir les messages.');
 });
 function showBell(message) { if (message) byId('lastBell').textContent = message; }
 if ('serviceWorker' in navigator) {
